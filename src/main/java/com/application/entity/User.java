@@ -14,9 +14,12 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name="users")
+@Getter @Setter
 public class User {
 	
 	@Id
@@ -25,13 +28,22 @@ public class User {
 	private int id;
 	
 	@Column(name="email")
-	private String email;
+	private String username;
 	
+	@Column(name="password")
+	private String passwords;	
+	
+
 	@Column(name="first_name")
 	private String firstName;
 	
 	@Column(name="last_name")
 	private String lastName;
+	
+	@Column(name="role")
+	private String role;
+	
+	
 	
 	@Column(name="dob")
 	private String dob;
@@ -68,25 +80,30 @@ public class User {
 	private Set<Match> matchesAsUser2;
 	
 	
-	@OneToMany(mappedBy = "sender", cascade = {CascadeType.REFRESH, CascadeType.DETACH,
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "sender", cascade = {CascadeType.REFRESH, CascadeType.DETACH,
 			CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE})
 	private Set<Message> sentMessages;
 
-	@OneToMany(mappedBy = "receiver", cascade = {CascadeType.REFRESH, CascadeType.DETACH,
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "receiver", cascade = {CascadeType.REFRESH, CascadeType.DETACH,
 			CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE})
 	private Set<Message> receivedMessages;
 	
-	public User() {
-		
-	}		
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = {CascadeType.DETACH, CascadeType.REFRESH,
+			CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE})
+	private Set<Feedback> userFeedback;
 	
 
+	
+	public User() {
+		
+	}
 
-	public User(int id, String email, String firstName, String lastName, String dob, String gender, String phoneNumber,
-		String address, LocalDateTime registrationDate) {
+	public User(int id, String username, String password, String firstName, String lastName, String dob, String gender,
+			String phoneNumber, String address, LocalDateTime registrationDate) {
 		super();
 		this.id = id;
-		this.email = email;
+		this.username = username;
+		this.passwords = password;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.dob = dob;
@@ -94,16 +111,14 @@ public class User {
 		this.phoneNumber = phoneNumber;
 		this.address = address;
 		this.registrationDate = registrationDate;
-}
+	}	
+	
 
-
-
-
-	public User(String email, String firstName, String lastName, String dob, String gender, String phoneNumber,
-			String address, LocalDateTime registrationDate, Profile profileId, Set<Match> matchesAsUser1,
-			Set<Match> matchesAsUser2, Set<Message> sentMessages, Set<Message> receivedMessages){
+	public User(String username, String passwords, String firstName, String lastName, String dob, String gender,
+			String phoneNumber, String address, LocalDateTime registrationDate, Profile profileId) {
 		super();
-		this.email = email;
+		this.username = username;
+		this.passwords = passwords;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.dob = dob;
@@ -112,10 +127,6 @@ public class User {
 		this.address = address;
 		this.registrationDate = registrationDate;
 		this.profileId = profileId;
-		this.matchesAsUser1 = matchesAsUser1;
-		this.matchesAsUser2 = matchesAsUser2;
-		this.sentMessages = sentMessages;
-		this.receivedMessages = receivedMessages;
 	}
 
 	public int getId() {
@@ -127,13 +138,14 @@ public class User {
 	public void setId(int id) {
 		this.id = id;
 	}
+	
 
-	public String getEmail() {
-		return email;
+	public String getUsername() {
+		return username;
 	}
 
-	public void setEmail(String email) {
-		this.email = email;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 	public String getFirstName() {
@@ -231,6 +243,27 @@ public class User {
 	public void setReceivedMessages(Set<Message> receivedMessages) {
 		this.receivedMessages = receivedMessages;
 	}
+
+	public String getPasswords() {
+		return passwords;
+	}
+
+	public void setPasswords(String passwords) {
+		this.passwords = passwords;
+	}
+
+	public Set<Feedback> getUserFeedback() {
+		return userFeedback;
+	}
+
+	public void setUserFeedback(Set<Feedback> userFeedback) {
+		this.userFeedback = userFeedback;
+	}
+
+
+	
+	
+	
 	
 	
 	

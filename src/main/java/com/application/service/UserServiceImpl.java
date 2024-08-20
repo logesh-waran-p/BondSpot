@@ -1,6 +1,7 @@
 package com.application.service;
 
 import java.util.List;
+
 import org.springframework.stereotype.Service;
 import com.application.entity.User;
 import com.application.repository.UserRepository;
@@ -16,9 +17,12 @@ public class UserServiceImpl implements UserService{
 	
 	private EntityManager entityManager;
 	
+	
+	
 	public UserServiceImpl(UserRepository theUserRepository, EntityManager theEntityManager) {
-		userRepository = theUserRepository;		
-		entityManager = theEntityManager;
+					userRepository = theUserRepository;		
+					entityManager = theEntityManager;
+					
 	}	
 	
 
@@ -26,7 +30,8 @@ public class UserServiceImpl implements UserService{
 	public List<String> findAll() {		
 		TypedQuery<String> query = entityManager.createQuery(
 			"SELECT CONCAT(' id: ', u.id,"
-						+ "' email: ', u.email,"
+						+ "' email: ', u.username,"
+						+ "' password: ', u.passwords,"
 						+ "' firstName: ', u.firstName,"
 						+ "' lastName: ', u.lastName,"
 						+ "' dob: ', u.dob,"
@@ -45,7 +50,7 @@ public class UserServiceImpl implements UserService{
 	public User findById(int theId) {
 		//create query
 		TypedQuery<User> query = entityManager.createQuery(						
-		"SELECT new com.application.entity.User(u.id, u.email, u.firstName, u.lastName, "
+		"SELECT new com.application.entity.User(u.id, u.username, u.passwords, u.firstName, u.lastName, "
 		+ "u.dob, u.gender, u.phoneNumber, u.address, u.registrationDate) " +
 		"FROM User u WHERE u.id = :id", User.class);
 						
@@ -67,6 +72,9 @@ public class UserServiceImpl implements UserService{
 	public void deleteById(int id) {
 		userRepository.deleteById(id);		
 	}
+
+
+	
 
 
 	
