@@ -71,7 +71,7 @@ public class MatchServiceImpl implements MatchService{
 		TypedQuery<Match> query = entityManager.createQuery(
 				
 		 "SELECT new com.application.entity.Match(m.id, m.user1, m.user2, m.matchDate, m.status) " +
-				  "FROM Match m WHERE m.user1 = :user1 ", Match.class);
+				  "FROM Match m WHERE m.user1 = :user1 OR m.user2 = :user1 ", Match.class);
 		
 		 // Create a reference to the User entity
 	    User userReference = entityManager.getReference(User.class, theId);

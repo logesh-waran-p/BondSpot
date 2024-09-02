@@ -70,7 +70,7 @@ public class MessageServiceImpl implements MessageService{
 				//create query
 				TypedQuery<Message> query = entityManager.createQuery(						
 				"SELECT new com.application.entity.Message(m.id, m.sender, m.receiver, m.content, m.sentAt) " +
-				"FROM Message m WHERE m.id = :id", Message.class);
+				"FROM Message m WHERE m.id = :id ", Message.class);
 						
 				query.setParameter("id", theId);
 						

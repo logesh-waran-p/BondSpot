@@ -18,38 +18,49 @@ import org.springframework.security.web.authentication.password.HaveIBeenPwnedRe
 public class DemoSecurityConfig {
 	
 	
-	
-
-//	//add support for JDBC and Default role based authentication
-//	
-	/*@Bean
-	public UserDetailsManager userDetailsManager(DataSource dataSource) {
-		JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager(dataSource);
-		
-		//define query to retrieve a user by username
-		jdbcUserDetailsManager.setUsersByUsernameQuery(
-				"select email, password, active from users where email=?"
-				);
-				
-		//define query to retrieve the roles by username
-		jdbcUserDetailsManager.setAuthoritiesByUsernameQuery(
-				"select email, role from roles where email=?"
-				);
-		return jdbcUserDetailsManager;
-	}*/
-	
-	
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
 		http.authorizeHttpRequests(configurer ->
 				configurer
-				
-					.requestMatchers(HttpMethod.GET, "/api/user").permitAll()
-					.requestMatchers(HttpMethod.GET, "/api/user/**").authenticated()					
-					.requestMatchers(HttpMethod.POST, "/api/user").permitAll()
-					.requestMatchers(HttpMethod.PUT, "/api/user/**").hasRole("admin")
-					.requestMatchers(HttpMethod.DELETE, "/api/user/**").hasRole("admin")
 					
+				// for user
+					.requestMatchers(HttpMethod.GET, "/api/user").permitAll()
+					.requestMatchers(HttpMethod.GET, "/api/user/**").authenticated()
+					.requestMatchers(HttpMethod.GET, "/api/users").authenticated()
+					.requestMatchers(HttpMethod.POST, "/api/user").permitAll()
+					.requestMatchers(HttpMethod.PUT, "/api/user/**").authenticated()
+					.requestMatchers(HttpMethod.DELETE, "/api/user/**").authenticated()
+					
+				//for profile
+					.requestMatchers(HttpMethod.GET, "/api/profile").permitAll()
+					.requestMatchers(HttpMethod.GET, "/api/profile/**").authenticated()
+					.requestMatchers(HttpMethod.PUT, "/api/profile/**").authenticated()
+					
+				//for match
+					.requestMatchers(HttpMethod.POST, "/api/match").permitAll()
+					.requestMatchers(HttpMethod.GET, "/api/match").permitAll()
+					.requestMatchers(HttpMethod.GET, "/api/match/**").authenticated()
+					.requestMatchers(HttpMethod.GET, "/api/match/user/**").authenticated()
+					.requestMatchers(HttpMethod.GET, "/api/match/status/*").authenticated()
+					.requestMatchers(HttpMethod.GET, "/api/match/user/*/status/*").authenticated()
+					.requestMatchers(HttpMethod.PUT, "/api/match/*/status").authenticated()
+					.requestMatchers(HttpMethod.DELETE, "/api/match/**").denyAll()
+				
+				//for message
+					.requestMatchers(HttpMethod.POST, "/api/message").permitAll()
+					.requestMatchers(HttpMethod.GET, "/api/conversation").denyAll()
+					.requestMatchers(HttpMethod.GET, "/api/message").denyAll()
+					.requestMatchers(HttpMethod.GET, "/api/message/**").authenticated()
+					.requestMatchers(HttpMethod.GET, "/api/message/sender/**").authenticated()
+					.requestMatchers(HttpMethod.GET, "/api/message/receiver/**").authenticated()
+					.requestMatchers(HttpMethod.DELETE, "/api/message/**").denyAll()
+					
+				//for feedback
+					.requestMatchers(HttpMethod.POST, "/api/feedback").permitAll()
+					.requestMatchers(HttpMethod.GET, "/api/feedback").permitAll()
+					.requestMatchers(HttpMethod.GET, "/api/feedback/**").permitAll()
+					.requestMatchers(HttpMethod.GET, "/api/feedback/user/**").permitAll()
+					.requestMatchers(HttpMethod.DELETE, "/api/feedback/**").denyAll()
 					
 				);
 		

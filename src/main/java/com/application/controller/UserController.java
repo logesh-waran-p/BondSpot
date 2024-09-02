@@ -3,7 +3,11 @@ package com.application.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +18,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.application.entity.User;
+import com.application.repository.UserRepository;
 import com.application.service.UserService;
+
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,10 +31,9 @@ public class UserController {
 	
 	private final UserService userService;
 	private final PasswordEncoder passwordEncoder;
+	private final UserRepository userRepository;
 	
-//	public UserController(UserService theUserService) {
-//		userService = theUserService;
-//	}
+
 	
 	
 	@GetMapping("/user")
@@ -38,6 +43,12 @@ public class UserController {
 			throw new RuntimeException("There Users Not Available: "+user);
 		}
 		return user;
+	}
+	
+	@GetMapping("/users")
+	public User getUserDetailsAfterLogin(Authentication authentication) {
+		Optional<User> optionalCustomer = userRepository.findByUsername(authentication.getName());
+		return optionalCustomer.orElse(null);
 	}
 	
 	
@@ -54,8 +65,17 @@ public class UserController {
 	}
 	
 	@GetMapping("/user/{userId}")
-	public Map<String, Object> findById(@PathVariable int userId) {
-		User user = userService.findById(userId);
+	public ResponseEntity<Map<String, Object>> findById(@PathVariable int userId, Authentication authentication) {
+		 Optional<User> optionalUser = userRepository.findByUsername(authentication.getName());
+		
+		User authenticatedUser = optionalUser.get();
+		if (!optionalUser.isPresent()) {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+	    }
+	    if (authenticatedUser.getId() != userId) {
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+	    }
+	    User user = userService.findById(userId);
 		
 		 Map<String, Object> userMap = new HashMap<>();
 		 	userMap.put("id", user.getId());
@@ -69,24 +89,49 @@ public class UserController {
 		 	userMap.put("address", user.getAddress());
 		 	userMap.put("registrationDate", user.getRegistrationDate());	    
 		
-		return userMap;
+		return ResponseEntity.ok(userMap);
 	}
 	
+
+	
 	@PutMapping("/user/{userId}")
-	public User updateUser(@RequestBody User user, @PathVariable int userId) {
-		user.setId(userId);		
-		User theUser = userService.save(user);
-		return theUser;
+	public ResponseEntity<User> updateUser(@RequestBody User user, @PathVariable int userId, Authentication authentication) {
+	    Optional<User> optionalUser = userRepository.findByUsername(authentication.getName());
+	    String hashpwd = passwordEncoder.encode(user.getPasswords());
+		user.setPasswords(hashpwd);
+	    
+	    if (!optionalUser.isPresent()) {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+	    }
+	    
+	    User authenticatedUser = optionalUser.get();
+	    if (authenticatedUser.getId() != userId) {
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+	    }
+	    
+	    user.setId(userId);
+	    User updatedUser = userService.save(user);
+	    return ResponseEntity.ok(updatedUser);
 	}
 	
 	@DeleteMapping("/user/{userId}")
-	public String deleteById(@PathVariable int userId) {
+	public ResponseEntity<String> deleteById(@PathVariable int userId, Authentication authentication) {
+		Optional<User> optionalUser = userRepository.findByUsername(authentication.getName());
+		
+		if (!optionalUser.isPresent()) {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+	    }
+	    
+	    User authenticatedUser = optionalUser.get();
+	    if (authenticatedUser.getId() != userId) {
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+	    }
 		User user = userService.findById(userId);
 		if(user==null) {
 			throw new RuntimeException("User Id not found: "+user);
 		}
 		userService.deleteById(userId);
-		return "User Id "+userId +" deleted successfully";
+		return ResponseEntity.ok("User Id "+userId +" deleted successfully");
 	}
 	
 	
